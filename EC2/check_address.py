@@ -37,19 +37,14 @@ class AddressTest(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         print 'calling tearDown'
+        clilib.request('vpc','disassociate-address',association_id=self.assoc1)
+        clilib.request('vpc','release-address',allocation_id=self.alloc1)
         clilib.request('vpc','delete-security-group',group_id=self.securityGroupId)
         clilib.request('vpc','delete-subnet',subnet_id=self.subnetId)
         clilib.request('vpc','delete-vpc',vpc_id=self.vpcId)
 
-    def attach_address(self):
+    def test1(self):
         print "Calling test 1"
-        images = clilib.request('compute','describe-images')['content']['DescribeImagesResponse']['imagesSet']['item']
-        for image in images:
-            if image['name'] == "Ubuntu 14.04":
-                imageId = image['imageId']
-        resp = clilib.request('compute','run-instances',subnet_id=self.subnetId, image_id = imageId , instance_type_id = 'c1.small')
-        self.assertEqual(200, resp['status'])
-        self.instance1 = resp['content']['RunInstancesResponse']['instancesSet']['item']['instanceId']
         resp = clilib.request('vpc','allocate-address', domain='vpc')
         self.assertEqual(200, resp['status'])
         self.alloc1 = resp['content']['AllocateAddressResponse']['allocationId']
@@ -58,22 +53,14 @@ class AddressTest(unittest.TestCase):
         self.assoc1 = resp['content']['AssociateAddressResponse']['associationId']
 
         
-    def wrongly_associate_release_address(self):
+    def test2(self):
         print "calling test 2"
-        images = clilib.request('compute','describe-images')['content']['DescribeImagesResponse']['imagesSet']['item']
-        for image in images:
-            if image['name'] == "Ubuntu 14.04":
-                imageId = image['imageId']
-        resp = clilib.request('compute','run-instances',subnet_id=self.subnetId, image_id = imageId , instance_type_id = 'c1.small')
-        self.assertEqual(200, resp['status'])
-        self.instance2 = resp['content']['RunInstancesResponse']['instancesSet']['item']['instanceId']
-
         resp = clilib.request('vpc','release-address',allocation_id=self.alloc1)
         self.assertEqual(400, resp['status'])
         resp = clilib.request('vpc','associate-address', instance_id=self.instance2, allocation_id=self.alloc1 )
         self.assertEqual(400, resp['status'])
 
-    def associate_address_of_terminated_instance(self):
+    def test3(self):
         print "Calling test 3"
         resp = clilib.request('compute','terminate-instances',instance_ids=self.instance1)
         self.assertEqual(200, resp['status'])
@@ -81,7 +68,7 @@ class AddressTest(unittest.TestCase):
         self.assertEqual(200, resp['status'])
         self.assoc1 = resp['content']['AssociateAddressResponse']['associationId']
 
-    def release_address_of_terminated_instance(self):
+    def test4(self):
         print "calling test 4"
         resp = clilib.request('compute','terminate-instances',instance_ids=self.instance2)
         self.assertEqual(200, resp['status'])
