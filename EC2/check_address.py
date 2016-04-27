@@ -37,8 +37,7 @@ class AddressTest(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         print 'calling tearDown'
-        clilib.request('vpc','disassociate-address',association_id=self.assoc1)
-        clilib.request('vpc','release-address',allocation_id=self.alloc1)
+        clilib.request('vpc','describe-addresses')
         clilib.request('vpc','delete-security-group',group_id=self.securityGroupId)
         clilib.request('vpc','delete-subnet',subnet_id=self.subnetId)
         clilib.request('vpc','delete-vpc',vpc_id=self.vpcId)
