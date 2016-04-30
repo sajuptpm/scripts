@@ -1,0 +1,25 @@
+dpak@dpak-lnx:~/jcs_cli/scripts/functest$ ./quota_show_update_ut.py
+INFO:urllib3.connectionpool:Starting new HTTPS connection (1): vpc.ind-west-1.staging.jiocloudservices.com
+INFO:Quota Update UT:Test: ENI Update: PASS
+...... Update quota back to default : 
+INFO:urllib3.connectionpool:Starting new HTTPS connection (1): vpc.ind-west-1.staging.jiocloudservices.com
+.INFO:urllib3.connectionpool:Starting new HTTPS connection (1): vpc.ind-west-1.staging.jiocloudservices.com
+INFO:Quota Update UT:Test: Floating-up Update: PASS
+...... Update quota back to default : 
+INFO:urllib3.connectionpool:Starting new HTTPS connection (1): vpc.ind-west-1.staging.jiocloudservices.com
+.INFO:urllib3.connectionpool:Starting new HTTPS connection (1): vpc.ind-west-1.staging.jiocloudservices.com
+F......Cleaning show_quota_api_test: 
+
+======================================================================
+FAIL: test_check_show_quota_api (__main__.ShowQuotaCheck)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "./quota_show_update_ut.py", line 25, in test_check_show_quota_api
+    self.fail(resp)
+AssertionError: {u'Response': {u'Errors': {u'Error': {u'Message': u'User does not have admin privileges: Only admin is authorized to access quotas for another tenant', u'Code': u'Forbidden'}}, u'RequestID': u'req-4502dd79-2158-4a98-9019-9bc306676abe'}}
+
+----------------------------------------------------------------------
+Ran 3 tests in 3.070s
+
+FAILED (failures=1)
+
