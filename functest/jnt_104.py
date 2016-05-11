@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-from common import client
-from common import vpc_manager
-from common import utils
+import time
 import netaddr
 import unittest
 import threading
 import settings
+from common import client
+from common import vpc_manager
+from common import utils
 
 class OverlappingVpcCidrCheck(unittest.TestCase):
 
@@ -39,6 +40,7 @@ class OverlappingVpcCidrCheck(unittest.TestCase):
 	self.jclient.vpc.delete_vpc(vpc_id=self.vpc_id)
 
 class ConcurrencyTesting(unittest.TestCase):
+    NUMBER_OF_THREADS = 100
 
     def setUp(self):
         self.jclient = client.Client()
@@ -47,23 +49,57 @@ class ConcurrencyTesting(unittest.TestCase):
 
     def check_overlap(self):
         res = self.jclient.vpc.describe_vpcs()
+        cidr_blocks = []
         items = utils.get_item(('DescribeVpcsResponse', 'vpcSet', 'item'), res)
-        cidr_blocks = [item['cidrBlock'] for item in items]
-	return len(cidr_blocks) == len(set(cidr_blocks))
+        if isinstance(items, list):
+            cidr_blocks = [item['cidrBlock'] for item in items]
+        elif isinstance(items, dict):
+	    cidr_blocks = [items['cidrBlock']]
+	if (len(cidr_blocks) == len(set(cidr_blocks))):
+	    return True
+        return False
 
-    def test_con(self):
+    def test_concurrency(self):
         cidr_block = '11.0.0.0/16'
-        net = netaddr.IPNetwork(cidr_block)
-        threads = []
-        for vpc_cidr in list(net.subnet(28))[:settings.VPC_QUOTA]:
-	    threading.Thread(target=self.jclient.vpc.create_vpc, kwargs={'cidr_block':str(vpc_cidr)}).start() 
+        thread_list = []
+        for x in range(self.NUMBER_OF_THREADS):
+            t = threading.Thread(target=self.jclient.vpc.create_vpc, kwargs={'cidr_block':cidr_block})
+            t.start()
+            thread_list.append(t)
+        for tr in thread_list:
+	    tr.join()
 	self.assertTrue(self.check_overlap())
 
     def tearDown(self):
         self.vpc_manager.delete_all_vpcs()
 
+class PerformanceTest(unittest.TestCase):
+
+    def setUp(self):
+        self.jclient = client.Client()
+        self.vpc_manager = vpc_manager.VpcManager(self.jclient)
+        self.vpc_manager.delete_all_vpcs(force=True)
+
+    def test_performance(self):
+        cidr_block = '12.0.0.0/16'
+        net = netaddr.IPNetwork(cidr_block)
+        #create N vpcs, N=VPC_QUOTA-1
+        thread_list = []
+        for _cidr_block in list(net.subnet(28))[:settings.VPC_QUOTA-1]:
+            t = threading.Thread(target=self.jclient.vpc.create_vpc, kwargs={'cidr_block':str(_cidr_block)})
+            t.start()
+            thread_list.append(t)
+        for tr in thread_list:
+            tr.join()
+        start_time = time.time()
+	self.vpc_manager.create_vpc(str(list(net.subnet(28))[settings.VPC_QUOTA]))
+	end_time = time.time() - start_time
+	print "Time (in seconds) taken to create a VPC: ", end_time
+
+    def tearDown(self):
+        self.vpc_manager.delete_all_vpcs()
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
 
 
