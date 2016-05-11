@@ -14,10 +14,12 @@ def wrapper(func):
         if resp is not None:
             try:
                 resp_dict = json.loads(resp.content)
+                resp_dict["Status"] = resp.status_code
             except:
                 resp_dict = xmltodict.parse(resp.content)
                 resp_json = json.dumps(resp_dict, indent=4, sort_keys=True)
                 resp_dict = json.loads(resp_json)
+                resp_dict["Status"] = resp.status_code
             return resp_dict
     return conv
 
@@ -37,6 +39,7 @@ class ClientConfigHandler(config.ConfigHandler):
         #self.secure = False
         self.access_key = access_key or os.environ.get('ACCESS_KEY')
         self.secret_key = secret_key or os.environ.get('SECRET_KEY')
+        self.process_cli_specific_args(["--insecure"])
         if not self.access_key or not self.secret_key:
             raise exception.UnknownCredentials()
 

@@ -1,5 +1,6 @@
 from jcsclient import clilib
 import unittest
+import time
 
 ### Usage info
 ### Make sure you have sorced openrc and
@@ -42,37 +43,42 @@ class AddressTest(unittest.TestCase):
         clilib.request('vpc','delete-subnet',subnet_id=self.subnetId)
         clilib.request('vpc','delete-vpc',vpc_id=self.vpcId)
 
-    def test1(self):
+    def test_1_allocate_address(self):
         print "Calling test 1"
         resp = clilib.request('vpc','allocate-address', domain='vpc')
         self.assertEqual(200, resp['status'])
-        self.alloc1 = resp['content']['AllocateAddressResponse']['allocationId']
-        resp = clilib.request('vpc','associate-address', instance_id=self.instance1, allocation_id=self.alloc1) 
+        self.__class__.alloc1 = resp['content']['AllocateAddressResponse']['allocationId']
+        resp = clilib.request('vpc','associate-address', instance_id=self.instance1, allocation_id=self.__class__.alloc1) 
         self.assertEqual(200, resp['status'])
-        self.assoc1 = resp['content']['AssociateAddressResponse']['associationId']
+        self.__class__.assoc1 = resp['content']['AssociateAddressResponse']['associationId']
 
         
-    def test2(self):
+    def test_2_wrongly_disassociate_release_address(self):
         print "calling test 2"
-        resp = clilib.request('vpc','release-address',allocation_id=self.alloc1)
+        resp = clilib.request('vpc','release-address',allocation_id=self.__class__.alloc1)
         self.assertEqual(400, resp['status'])
-        resp = clilib.request('vpc','associate-address', instance_id=self.instance2, allocation_id=self.alloc1 )
+        resp = clilib.request('vpc','associate-address', instance_id=self.instance2, allocation_id=self.__class__.alloc1 )
         self.assertEqual(400, resp['status'])
 
-    def test3(self):
+    def test_3_associate_terminated_instace_address(self):
         print "Calling test 3"
         resp = clilib.request('compute','terminate-instances',instance_ids=self.instance1)
         self.assertEqual(200, resp['status'])
-        resp = clilib.request('vpc','associate-address', instance_id=self.instance2, allocation_id=self.alloc1)
+        print resp
+        time.sleep (1)
+        resp = clilib.request('vpc','associate-address', instance_id=self.instance2, allocation_id=self.__class__.alloc1)
+        print resp
         self.assertEqual(200, resp['status'])
-        self.assoc1 = resp['content']['AssociateAddressResponse']['associationId']
+        self.__class__.assoc1 = resp['content']['AssociateAddressResponse']['associationId']
 
-    def test4(self):
+    def test_4_release_terminated_instance_address(self):
         print "calling test 4"
         resp = clilib.request('compute','terminate-instances',instance_ids=self.instance2)
+        print resp
         self.assertEqual(200, resp['status'])
-
-        resp = clilib.request('vpc','release-address',allocation_id=self.alloc1)
+        time.sleep(1)
+        resp = clilib.request('vpc','release-address',allocation_id=self.__class__.alloc1)
+        print resp
         self.assertEqual(200, resp['status'])
 
 
@@ -84,5 +90,6 @@ class AddressTest(unittest.TestCase):
 if __name__ == '__main__':
     #LOG.info('Initiating test cases: ')
     #add = Address()
-    unittest.main()
-    
+    #unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(AddressTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)    
