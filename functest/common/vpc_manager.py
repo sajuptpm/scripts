@@ -13,10 +13,7 @@ class VpcManager(base_manager.BaseManager):
         ids = []
         items = None
         res = self.jclient.vpc.describe_vpcs()
-        try:
-            items = utils.get_item(('DescribeVpcsResponse', 'vpcSet', 'item'), res)
-        except KeyError as ex:
-            pass
+        items = utils.get_item(('DescribeVpcsResponse', 'vpcSet', 'item'), res)
         if isinstance(items, list):
             return [item['vpcId'] for item in items]
         elif isinstance(items, dict):
@@ -24,12 +21,12 @@ class VpcManager(base_manager.BaseManager):
         return ids
 
     def delete_all_vpcs(self, force=False):
-        vpc_ids = self.get_all_vpc_ids()
-        print "......Cleaning VPCs: ", len(vpc_ids)
-        for vpc_id in vpc_ids:
-	    if force:
-		gm = generic_manager.GenericManager(self.jclient)
-		gm.delete_vpc(vpc_id)
-	    else:
-            	self.jclient.vpc.delete_vpc(vpc_id=vpc_id)
+        ids = self.get_all_vpc_ids()
+        print "......Cleaning VPCs: ", len(ids), ids
+        for _id in ids:
+            if force:
+                gm = generic_manager.GenericManager(self.jclient)
+                gm.delete_vpc(_id)
+            else:
+                self.jclient.vpc.delete_vpc(vpc_id=_id)
 

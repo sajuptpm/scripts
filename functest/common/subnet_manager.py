@@ -12,10 +12,7 @@ class SubnetManager(base_manager.BaseManager):
         ids = []
         items = None
         res = self.jclient.vpc.describe_subnets()
-        try:
-            items = utils.get_item(('DescribeSubnetsResponse', 'subnetSet', 'item'), res)
-        except (KeyError, AttributeError) as ex:
-            pass
+        items = utils.get_item(('DescribeSubnetsResponse', 'subnetSet', 'item'), res)
         if isinstance(items, list):
             return [item['subnetId'] for item in items if item.get('vpcId') == vpc_id]
         elif isinstance(items, dict):
@@ -24,8 +21,8 @@ class SubnetManager(base_manager.BaseManager):
         return ids
 
     def delete_all_subnets(self, vpc_id):
-        subnet_ids = self.get_all_subnet_ids(vpc_id)
-        print "......Cleaning Subnets: ", len(subnet_ids)
-        for subnet_id in subnet_ids:
-            self.jclient.vpc.delete_subnet(subnet_id=subnet_id)
+        ids = self.get_all_subnet_ids(vpc_id)
+        print "......Cleaning Subnets: ", len(ids)
+        for _id in ids:
+            self.jclient.vpc.delete_subnet(subnet_id=_id)
 

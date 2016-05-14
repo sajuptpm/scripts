@@ -7,19 +7,17 @@ class AddressManager(base_manager.BaseManager):
         ids = []
         items = None
         res = self.jclient.vpc.describe_addresses()
-        try:
-            items = utils.get_item(('DescribeAddressesResponse', 'addressesSet', 'item'), res)
-        except KeyError as ex:
-            pass
+        items = utils.get_item(('DescribeAddressesResponse', 'addressesSet', 'item'), res)
         if isinstance(items, list):
-            return [item['allocationId'] for item in items]
+            #Bug:Sometimes allocationId key doesn't exist in item
+            return [item['allocationId'] for item in items if item.get("allocationId")]
         elif isinstance(items, dict):
             return [items['allocationId']]
         return ids
 
     def delete_all_addresses(self):
-        address_ids = self.get_all_address_ids()
-        print "......Cleaning Addresses: ", len(address_ids)
-        for address_id in address_ids:
-            self.jclient.vpc.release_address(allocation_id=address_id)
+        ids = self.get_all_address_ids()
+        print "......Cleaning Addresses: ", len(ids)
+        for _id in ids:
+            self.jclient.vpc.release_address(allocation_id=_id)
 

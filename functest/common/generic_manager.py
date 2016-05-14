@@ -4,6 +4,7 @@ import subnet_manager
 import address_manager
 import security_group_manager
 import instance_manager
+import route_table_manager
 
 class GenericManager(base_manager.BaseManager):
 
@@ -14,9 +15,12 @@ class GenericManager(base_manager.BaseManager):
         self.address_manager = address_manager.AddressManager(self.jclient)
         self.security_group_manager = security_group_manager.SecurityGroupManager(self.jclient)
         self.instance_manager = instance_manager.InstanceManager(self.jclient)
+        self.route_table_manager = route_table_manager.RouteTableManager(self.jclient)
 
     def delete_vpc(self, vpc_id, force=False):
         self.instance_manager.delete_all_instances(vpc_id)
+        self.route_table_manager.delete_all_route_tables(vpc_id)
         self.subnet_manager.delete_all_subnets(vpc_id)
         self.security_group_manager.delete_all_security_groups(vpc_id)
-        self.jclient.vpc.delete_vpc(vpc_id=vpc_id)
+        res = self.jclient.vpc.delete_vpc(vpc_id=vpc_id)
+        print "------", res
