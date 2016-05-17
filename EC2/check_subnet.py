@@ -5,6 +5,18 @@ import unittest
 ### Make sure you have sorced openrc and
 ### you have jcsclient installed before 
 ### starting this script
+### ***************test cases****************
+### 1. Test link local cidr 169.254.x.x 
+### 2. test loopback cidr 127.x.x.x
+### 3. Test Class C&D cidr 240.x.x.x
+### 4. Test 0.x.x.x cidr
+### 5. Test wrong network id such as 10.0.0.1/24
+### 6. Test with correct cidr 
+### 7. Test out of vpc range cidr
+### 8. Test wrong netmask or invalid cidr such as 10.257.0.0/24, 10.0.1.0/39, 10.0.0.0/15 etc.
+### 9. Test subnet conflict cidr
+
+### Note: Test case 1 to 7 seven comes under out of vpc range except case 7
 
 class VpcTest(unittest.TestCase):
     @classmethod
