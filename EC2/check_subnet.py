@@ -45,7 +45,7 @@ class VpcTest(unittest.TestCase):
         else:
            Code=resp['content']['Response']['Errors']['Error']['Code']
            self.assertEqual("OutOfVpcSubnet.Range", Code)
-        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='127.0.0.0/8')
+        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='127.0.0.0/17')
         self.assertEqual(400, resp['status'])
         if resp['status'] == 200:
            subnetId=resp['content']['CreateSubnetResponse']['subnet']['subnetId']
@@ -61,7 +61,7 @@ class VpcTest(unittest.TestCase):
         else:
            Code=resp['content']['Response']['Errors']['Error']['Code']
            self.assertEqual("OutOfVpcSubnet.Range", Code)
-        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='127.0.0.0/29')
+        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='127.0.0.0/17')
         self.assertEqual(400, resp['status'])
         if resp['status'] == 200:
            subnetId=resp['content']['CreateSubnetResponse']['subnet']['subnetId']
@@ -90,7 +90,7 @@ class VpcTest(unittest.TestCase):
         else:
            Code=resp['content']['Response']['Errors']['Error']['Code']
            self.assertEqual("OutOfVpcSubnet.Range", Code)
-        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='0.0.0.0/8')
+        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='0.0.0.0/24')
         self.assertEqual(400, resp['status'])
         if resp['status'] == 200:
            subnetId=resp['content']['CreateSubnetResponse']['subnet']['subnetId']
@@ -117,7 +117,7 @@ class VpcTest(unittest.TestCase):
         else:
            Code=resp['content']['Response']['Errors']['Error']['Code']
            self.assertEqual("OutOfVpcSubnet.Range", Code)
-        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='224.0.0.0/8')
+        resp = clilib.request('vpc','create-subnet', vpc_id=self.vpcId, cidr_block='224.0.0.0/16')
         self.assertEqual(400, resp['status'])
         if resp['status'] == 200:
            subnetId=resp['content']['CreateSubnetResponse']['subnet']['subnetId']
