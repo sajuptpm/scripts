@@ -3,6 +3,11 @@ import utils
 
 class SubnetManager(base_manager.BaseManager):
 
+    def create_subnet(self, vpc_id, cidr_block):
+        res = self.jclient.vpc.create_subnet(vpc_id=vpc_id, cidr_block=cidr_block)
+        subnet_id = utils.get_item(('CreateSubnetResponse', 'subnet', 'subnetId'), res)
+        return subnet_id
+
     def get_all_subnet_ids(self, vpc_id):
         ids = []
         items = None
