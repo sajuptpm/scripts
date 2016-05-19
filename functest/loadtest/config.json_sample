@@ -1,0 +1,22 @@
+{"accounts": [{
+                "name": "test_account1",
+                "enabled": false,
+                "access_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "secret_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "image_id": "jmi-31a27588",
+                "instance_type_id": "c1.small"},
+                {"name": "test_account2",
+                "enabled": true,
+                "access_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "secret_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "image_id": "jmi-31a27588",
+                "instance_type_id": "c1.small"},
+                {"name": "test_account3",
+                "enabled": true,
+                "access_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "secret_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "image_id": "jmi-31a27588",
+                "instance_type_id": "c1.small"}
+
+            ]
+}

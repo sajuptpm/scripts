@@ -26,8 +26,8 @@ class PerformanceTest(unittest.TestCase):
             thread_list.append(t)
         for tr in thread_list:
             tr.join()
-	end_time = time.time() - start_time
-	print "Time (in seconds) taken to create {num} VPCs: {time_taken}".format(num=settings.VPC_QUOTA, time_taken=end_time)
+        end_time = time.time() - start_time
+        print "Time (in seconds) taken to create {num} VPCs: {time_taken}".format(num=settings.VPC_QUOTA, time_taken=end_time)
 
     def tearDown(self):
         self.vpc_manager.delete_all_vpcs()
