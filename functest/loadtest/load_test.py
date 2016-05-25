@@ -39,6 +39,9 @@ class BaseTest(object):
     def get_instance_type_id(self, config):
         return config.get("instance_type_id")
 
+    def get_username(self):
+        return self.config.get("name")
+
     def run(self):
         self.test_cases()
 
@@ -58,6 +61,7 @@ class LoadTestSuit(BaseTest):
     def test_address_operations(self):
         for x in range(settings.ADDRESS_QUOTA):
             address_allocation_id = self.address_manager.allocate_address(logger=self.logger)
+            print "...address_id: {address_id} username:{username}".format(address_id=address_allocation_id, username=self.get_username())
             if address_allocation_id:
                 self.address_manager.describe_addresses(address_allocation_id, logger=self.logger)
                 self.address_manager.release_address(address_allocation_id, logger=self.logger)
@@ -66,6 +70,8 @@ class LoadTestSuit(BaseTest):
         for x in range(settings.SECURITY_GROUP_QUOTA):
             gname="test-{num}".format(num=str(x))
             security_group_id = self.security_group_manager.create_security_group(vpc_id, gname, gname, logger=self.logger)
+            print "...security_group_id: {security_group_id} username:{username}".\
+                    format(security_group_id=security_group_id, username=self.get_username())
             if security_group_id:
                 self.security_group_manager.describe_security_groups(group_ids=security_group_id, logger=self.logger)
                 self.security_group_rule_manager.create_ingress_rule(security_group_id, logger=self.logger)
@@ -82,7 +88,7 @@ class LoadTestSuit(BaseTest):
 
     def test_vpc_operations(self, vpc_cidr):
         vpc_id = self.vpc_manager.create_vpc(vpc_cidr, logger=self.logger)
-        print "=======vpc_id========", vpc_id
+        print "...vpc_id: {vpc_id} username:{username}".format(vpc_id=vpc_id, username=self.get_username())
         if vpc_id:
             self.vpc_manager.describe_vpcs(vpc_ids=vpc_id, logger=self.logger)
             thread_list = []
@@ -106,8 +112,8 @@ class LoadTestSuit(BaseTest):
                 tr.join()
 
     def test_cases(self):
-        for x in range(5):
-            print "===Start==="
+        for x in range(1):
+            print "...Star...{username}".format(username=self.get_username()) 
             self.clear_all_resources()
             #continue
             thread_list = []
@@ -125,7 +131,8 @@ class LoadTestSuit(BaseTest):
 
             for tr in thread_list:
                 tr.join()
-            print "===End==="
+            self.clear_all_resources()
+            print "...End...{username}".format(username=self.get_username())
 
 class TestRunner(object):
 

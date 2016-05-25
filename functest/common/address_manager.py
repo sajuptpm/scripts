@@ -46,10 +46,10 @@ class AddressManager(base_manager.BaseManager):
         res = self.jclient.vpc.describe_addresses()
         items = utils.get_item(('DescribeAddressesResponse', 'addressesSet', 'item'), res)
         if isinstance(items, list):
-            alloc_ids = [item['allocationId'] for item in items]
+            alloc_ids = [item['allocationId'] for item in items if item.get('allocationId')]
             assoc_ids = [item['associationId'] for item in items if item.get('associationId')]
         elif isinstance(items, dict):
-            alloc_ids = [items['allocationId']]
+            alloc_ids = [items.get('allocationId') and items['allocationId']]
             if items.get('associationId'):
                 assoc_ids = [items['associationId']]
         return (alloc_ids, assoc_ids)
