@@ -23,6 +23,7 @@ class AddressTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
 
+        self.jclient = client.Client()#access_key = access, secret_key = secret, vpc_url = vpc_url , compute_url = compute_url )
         LOG_FILENAME = 'address_test.log'
         logging.basicConfig(filename=LOG_FILENAME, 
                         level=logging.INFO,
@@ -34,8 +35,8 @@ class AddressTest(unittest.TestCase):
         self.allocateAddressId2 = None
         self.associateAddressId1 = None
         self.associateAddressId2 = None
-        self.vpcId = 'vpc-d86faca2'
-        self.subnetId = 'subnet-5d46e643'
+        self.vpcId = 'vpc-2ce94216'
+        self.subnetId = 'subnet-bfb8b697'
 
         '''
         resp = self.jclient.vpc.create_vpc(cidr_block='192.168.0.0/24')
@@ -111,42 +112,53 @@ class AddressTest(unittest.TestCase):
             self.fail('Address1 not allcoated')
 
 #when address1 is deassociated
-    def test_associate_address1_instance2(self):
+    def test_associate_Disassociate_address1_instance2(self):
         if self.__class__.allocateAddressId1 :
             resp = self.jclient.vpc.disassociate_address(association_id = self.__class__.associateAddressId1 )
             logging.info(resp)
             self.assertEqual(200, resp['status'])
             resp = self.jclient.vpc.associate_address(allocation_id= self.__class__.allocateAddressId1 , instance_id = self.__class__.instanceId2 )
             logging.info(resp)
-            self.assertEqual(200, resp['status'])
-            self.__class__.associateAddressId1 = resp['AssociateAddressResponse']['associationId']
+            self.assertEqual(400, resp['status'])
+#            self.__class__.associateAddressId1 = resp['AssociateAddressResponse']['associationId']
         else:
             self.fail('Address1 not allcoated')
 
     @classmethod
     def tearDownClass(self):
         logging.info( "Calling teardown")
-        if self.__class__.associateAddressId1 :
-            resp = self.jclient.vpc.disassociate_address(association_id = self.__class__.associateAddressId )
+        if self.instanceId1 :
+            resp = self.jclient.compute.terminate_instances(instance_ids=self.instanceId1)
+            logging.info(resp)
+        else:
+            self.fail('Instance not created')
+
+        if self.instanceId2 :
+            resp = self.jclient.compute.terminate_instances(instance_ids=self.instanceId2)
+            logging.info(resp)
+        else:
+            self.fail('Instance not created')
+
+        if self.associateAddressId1 :
+            resp = self.jclient.vpc.disassociate_address(association_id = self.associateAddressId1 )
             logging.info(resp)
         else:
             self.fail('Address1 not associated')
 
-        if self.__class__.associateAddressId2 :
-            resp = self.jclient.vpc.disassociate_address(association_id = self.__class__.associateAddressId2 )
+        if self.associateAddressId2 :
+            resp = self.jclient.vpc.disassociate_address(association_id = self.associateAddressId2 )
             logging.info(resp)
         else:
             self.fail('Address2 not associated')
 
-        if self.__class__.allocateAddressId1 :
-            resp = self.jclient.vpc.release_address(allocation_id= self.__class__.allocateAddressId1)
+        if self.allocateAddressId1 :
+            resp = self.jclient.vpc.release_address(allocation_id= self.allocateAddressId1)
             logging.info(resp)
-            self.assertEqual(200, resp['status'])
         else:
             self.fail('Address1 not allcoated')
 
-        if self.__class__.allocateAddressId2 :
-            resp = self.jclient.vpc.release_address(allocation_id= self.__class__.allocateAddressId2)
+        if self.allocateAddressId2 :
+            resp = self.jclient.vpc.release_address(allocation_id= self.allocateAddressId2)
             logging.info(resp)
         else:
             self.fail('Address2 not allcoated')
@@ -174,5 +186,5 @@ if __name__ == '__main__':
     test.addTest(AddressTest("test_associate_address2_instance1"))
     test.addTest(AddressTest("test_associate_address1_instance2"))
     test.addTest(AddressTest("test_associate_address2_instance2"))
-    test.addTest(AddressTest("test_associate_address1_instance2"))
+    test.addTest(AddressTest("test_associate_Disassociate_address1_instance2"))
     unittest.TextTestRunner(verbosity=2).run(test)
