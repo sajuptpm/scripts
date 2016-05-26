@@ -35,10 +35,7 @@ class AddressTest(unittest.TestCase):
         self.allocateAddressId2 = None
         self.associateAddressId1 = None
         self.associateAddressId2 = None
-        self.vpcId = 'vpc-2ce94216'
-        self.subnetId = 'subnet-bfb8b697'
 
-        '''
         resp = self.jclient.vpc.create_vpc(cidr_block='192.168.0.0/24')
         logging.info(resp)
 
@@ -47,10 +44,9 @@ class AddressTest(unittest.TestCase):
         if self.vpcId:
             resp = self.jclient.vpc.create_subnet(vpc_id = self.vpcId, cidr_block='192.168.0.64/26')
             logging.info(resp)
-            self..subnetId = resp['CreateSubnetResponse']['subnet']['subnetId']
+            self.subnetId = resp['CreateSubnetResponse']['subnet']['subnetId']
         else:
             self.fail('Vpc not created')
-        '''
         
         images = self.jclient.compute.describe_images()['DescribeImagesResponse']['imagesSet']['item']
         for image in images:
@@ -162,7 +158,7 @@ class AddressTest(unittest.TestCase):
             logging.info(resp)
         else:
             self.fail('Address2 not allcoated')
-'''
+
         if self.__class__.subnetId :
             resp = self.jclient.vpc.delete_subnet(subnet_id=self.subnetId)
             logging.info(resp)
@@ -170,12 +166,11 @@ class AddressTest(unittest.TestCase):
             self.fail('Subnet not created')
 
         if self.__class__.vpcId :
-            resp = self.jclient.vpc.delete_vpc(vpc_id=self.__class__.vpcId)
+            resp = self.jclient.vpc.delete_vpc(vpc_id=self.vpcId)
             logging.info(resp)
-            self.assertEqual(200, resp['status'])
         else:
             self.fail('VPC not created')
-'''
+
 
 if __name__ == '__main__':
     #LOG.info('Initiating test cases: ')
