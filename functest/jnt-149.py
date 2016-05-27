@@ -13,6 +13,11 @@ import logging
 #   4. Associate 1st IP to insatnce2
 #   5. Associate 2nd IP to insatnce2
 #   6. Disassociate 1st ip from instance1 and the Associate to insatnce2
+#   7. Associate 1st ip to instance1 and terminate the instance1
+#   8. Disassociate 2nd ip from instance2
+#   9. Associate 1st ip to instance2
+#   10.Associate 2nd ip to instance2 
+
 
 class AddressTest(unittest.TestCase):
 
@@ -108,7 +113,7 @@ class AddressTest(unittest.TestCase):
             self.fail('Address1 not allcoated')
 
 #when address1 is deassociated
-    def test_associate_Disassociate_address1_instance2(self):
+    def test_Disassociate_address1_then_associate_to_instance2(self):
         if self.__class__.allocateAddressId1 :
             resp = self.jclient.vpc.disassociate_address(association_id = self.__class__.associateAddressId1 )
             logging.info(resp)
@@ -120,15 +125,51 @@ class AddressTest(unittest.TestCase):
         else:
             self.fail('Address1 not allcoated')
 
+    def test_disaccociate_address2_from_instance2(self):
+        if self.associateAddressId1 :
+            resp = self.jclient.vpc.disassociate_address(association_id = self.associateAddressId1 )
+            self.assertEqual(200, resp['status'])
+            logging.info(resp)
+        else:
+            self.fail('Address1 not associated')
+
+    def test_terminate_instance1(self):
+        if self.instanceId1 :
+            resp = self.jclient.compute.terminate_instances(instance_ids=self.instanceId1)
+            self.assertEqual(200, resp['status'])
+            logging.info(resp)
+        else:
+            self.fail('Instance not created')
+
+
+    def test_associate_address1_instance2_after_terminate_instance1(self):
+        if self.__class__.allocateAddressId1 :
+            resp = self.jclient.vpc.associate_address(allocation_id= self.__class__.allocateAddressId1 , instance_id = self.__class__.instanceId2 )
+            logging.info(resp)
+            self.assertEqual(200, resp['status'])
+            self.__class__.associateAddressId1 = resp['AssociateAddressResponse']['associationId']
+        else:
+            self.fail('Address1 not allcoated')
+
+    def test_associate_address2_instance2_after_terminate_instance1(self):
+        if self.__class__.allocateAddressId2 :
+            resp = self.jclient.vpc.associate_address(allocation_id= self.__class__.allocateAddressId2 , instance_id = self.__class__.instanceId1 )
+            logging.info(resp)
+            self.assertEqual(400, resp['status'])
+        else:
+            self.fail('Address1 not allcoated')
+
+
     @classmethod
     def tearDownClass(self):
         logging.info( "Calling teardown")
+        '''
         if self.instanceId1 :
             resp = self.jclient.compute.terminate_instances(instance_ids=self.instanceId1)
             logging.info(resp)
         else:
             self.fail('Instance not created')
-
+        '''
         if self.instanceId2 :
             resp = self.jclient.compute.terminate_instances(instance_ids=self.instanceId2)
             logging.info(resp)
@@ -181,5 +222,9 @@ if __name__ == '__main__':
     test.addTest(AddressTest("test_associate_address2_instance1"))
     test.addTest(AddressTest("test_associate_address1_instance2"))
     test.addTest(AddressTest("test_associate_address2_instance2"))
-    test.addTest(AddressTest("test_associate_Disassociate_address1_instance2"))
+    test.addTest(AddressTest("test_Disassociate_address1_then_associate_to_instance2"))
+    test.addTest(AddressTest("test_associate_address1_instance1"))
+    test.addTest(AddressTest("test_terminate_instance1"))
+    test.addTest(AddressTest("test_associate_address1_instance2_after_terminate_instance1"))
+    test.addTest(AddressTest("test_associate_address2_instance2_after_terminate_instance1"))
     unittest.TextTestRunner(verbosity=2).run(test)
