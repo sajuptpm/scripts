@@ -15,29 +15,30 @@ class OverlappingVpcCidrCheck(unittest.TestCase):
         self.jclient = client.Client()
         self.vpc_manager = vpc_manager.VpcManager(self.jclient)
         self.vpc_manager.delete_all_vpcs(force=True)
-	self.vpc_id = None
+        self.vpc_id = None
 	
     def check_overlapping_cidr_block(self, cidr_block1, cidr_block2):
-	res = self.jclient.vpc.create_vpc(cidr_block=cidr_block1)
+        res = self.jclient.vpc.create_vpc(cidr_block=cidr_block1)
         if res.get("Response"):
             self.assertEqual(res['Response']['Errors']['Error']['Code'],  "OverlappedVpc.Range")
             return
-	self.vpc_id = res['CreateVpcResponse']['vpc']['vpcId']
-	res = self.jclient.vpc.create_vpc(cidr_block=cidr_block2)
+	    self.vpc_id = res['CreateVpcResponse']['vpc']['vpcId']
+	    res = self.jclient.vpc.create_vpc(cidr_block=cidr_block2)
         if res.get("Response"):
             self.assertEqual(res['Response']['Errors']['Error']['Code'],  "OverlappedVpc.Range")
             return
         self.fail("Could not find expected exception OverlappedVpc.Range")
 
     def test_overlapping_subset_cidr(self):
-	self.check_overlapping_cidr_block('11.0.0.0/16', '11.0.0.0/28')
+	    self.check_overlapping_cidr_block('11.0.0.0/16', '11.0.0.0/28')
 
     def test_overlapping_superset_cidr(self):
         self.check_overlapping_cidr_block('12.0.0.0/28', '12.0.0.0/16')
 
     def tearDown(self):
-	print "......Cleaning VPC: ", self.vpc_id
-	self.jclient.vpc.delete_vpc(vpc_id=self.vpc_id)
+        print "......Cleaning VPC: ", self.vpc_id
+        if self.vpc_id:
+            self.jclient.vpc.delete_vpc(vpc_id=self.vpc_id)
 
 class ConcurrencyTesting(unittest.TestCase):
     NUMBER_OF_THREADS = 100
@@ -54,9 +55,9 @@ class ConcurrencyTesting(unittest.TestCase):
         if isinstance(items, list):
             cidr_blocks = [item['cidrBlock'] for item in items]
         elif isinstance(items, dict):
-	    cidr_blocks = [items['cidrBlock']]
-	if (len(cidr_blocks) == len(set(cidr_blocks))):
-	    return True
+            cidr_blocks = [items['cidrBlock']]
+        if (len(cidr_blocks) == len(set(cidr_blocks))):
+            return True
         return False
 
     def test_concurrency(self):
@@ -67,8 +68,8 @@ class ConcurrencyTesting(unittest.TestCase):
             t.start()
             thread_list.append(t)
         for tr in thread_list:
-	    tr.join()
-	self.assertTrue(self.check_overlap())
+            tr.join()
+        self.assertTrue(self.check_overlap())
 
     def tearDown(self):
         self.vpc_manager.delete_all_vpcs()
@@ -92,9 +93,9 @@ class PerformanceTest(unittest.TestCase):
         for tr in thread_list:
             tr.join()
         start_time = time.time()
-	self.vpc_manager.create_vpc(str(list(net.subnet(28))[settings.VPC_QUOTA]))
-	end_time = time.time() - start_time
-	print "Time (in seconds) taken to create a VPC: ", end_time
+        self.vpc_manager.create_vpc(str(list(net.subnet(28))[settings.VPC_QUOTA]))
+        end_time = time.time() - start_time
+        print "Time (in seconds) taken to create a VPC: ", end_time
 
     def tearDown(self):
         self.vpc_manager.delete_all_vpcs()
