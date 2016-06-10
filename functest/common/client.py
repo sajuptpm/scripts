@@ -1,5 +1,6 @@
 from jcsclient import utils
 from jcsclient import config
+from jcsclient import requestify
 from jcsclient.requestify import common_headers
 from jcsclient import auth_handler
 from jcsclient import exception
@@ -8,6 +9,9 @@ import xmltodict
 import os
 import sys
 import requests
+def patch_make_request(url, verb, headers, params, path=None, data=None):
+    return (url, verb, headers, params, path, data)
+requestify.make_request = patch_make_request
 
 def make_request(url, verb, headers, params, path=None, data=None, config_handler=None):
     """
@@ -48,8 +52,7 @@ def wrapper(func, config_handler):
         for (k, v,) in kwargs.items():
             new_args.extend(['--{option}'.format(option=k.replace('_', '-')), v])
         resp = func(tuple(new_args))
-        #comment line below before doing load test
-        #resp = make_request(*resp, config_handler=config_handler)
+        resp = make_request(*resp, config_handler=config_handler)
         if resp is not None:
             try:
                 resp_dict = json.loads(resp.content)
