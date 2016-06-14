@@ -1,5 +1,6 @@
 import base_manager
 import utils
+import simplejson as json
 
 class RouteTableManager(base_manager.BaseManager):
 
@@ -57,7 +58,7 @@ class RouteTableManager(base_manager.BaseManager):
                 if item['vpcId']==vpc_id:
                     if utils.get_item(('associationSet', 'item', 'routeTableAssociationId'), item):
                         if not include_main_route:
-                            if not utils.get_item(('associationSet', 'item', 'main'), item):
+                            if not json.loads(utils.get_item(('associationSet', 'item', 'main'), item)):
                                 assoc_ids.append(utils.get_item(('associationSet', 'item', 'routeTableAssociationId'), item))
                                 route_table_ids.append(item['routeTableId'])
                         else:
@@ -69,7 +70,7 @@ class RouteTableManager(base_manager.BaseManager):
             if items['vpcId'] == vpc_id:
                 if utils.get_item(('associationSet', 'item', 'routeTableAssociationId'), items):
                     if not include_main_route:
-                        if not utils.get_item(('associationSet', 'item', 'main'), items):
+                        if not json.loads(utils.get_item(('associationSet', 'item', 'main'), items)):
                             assoc_ids.append(utils.get_item(('associationSet', 'item', 'routeTableAssociationId'), items))
                             route_table_ids.append(items['allocationId'])
                     else:
